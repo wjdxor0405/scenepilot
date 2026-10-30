@@ -47,7 +47,7 @@ def test_www_is_built_from_the_web_ui_with_only_app_additions():
     assert "/static/" not in html and 'src="./app.js"' in html
     for name in re.findall(r'(?:src|href)="\./([^"]+)"', html):
         assert (www / name).is_file(), f"the app's index.html loads {name}, which is missing from www/"
-    assert html.index("app-config.js") < html.index("api-shim.js") < html.index("geo.js")
+    assert html.index("app-config.js") < html.index("api-shim.js") < html.index("local-rules.js") < html.index("local-first.js") < html.index("geo.js")
     assert html.index("speech.js") < html.index("native-speech.js") < html.index("native-tts.js") < html.index("app.js")
     assert html.index("app.js") < html.index("native-back.js")
     assert (www / "app-config.js").read_text(encoding="utf-8").strip() == 'window.SCENEPILOT_API_BASE = "https://example.test";'

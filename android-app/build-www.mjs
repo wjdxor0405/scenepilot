@@ -26,7 +26,7 @@ rmSync(out, { recursive: true, force: true });
 mkdirSync(out, { recursive: true });
 for (const file of assets) cpSync(join(webSource, file), join(out, file));
 if (existsSync(join(webSource, "audio"))) cpSync(join(webSource, "audio"), join(out, "static", "audio"), { recursive: true });
-for (const file of ["api-shim.js", "native-speech.js", "native-tts.js", "native-back.js"]) cpSync(join(here, "native", file), join(out, file));
+for (const file of ["api-shim.js", "local-rules.js", "local-first.js", "native-speech.js", "native-tts.js", "native-back.js"]) cpSync(join(here, "native", file), join(out, file));
 writeFileSync(join(out, "app-config.js"), `window.SCENEPILOT_API_BASE = ${JSON.stringify(apiBase)};\n`);
 // Read by capacitor.config.js at sync time: mixed content is only allowed when this build talks to an http:// server.
 writeFileSync(join(out, "build.json"), JSON.stringify({ apiBase, release }) + "\n");
@@ -36,7 +36,7 @@ function insert(html, anchor, extra, where) {
   return html.replace(anchor, where === "before" ? extra + anchor : anchor + extra);
 }
 html = html.replaceAll('"/static/', '"./');
-html = insert(html, '<script src="./geo.js"></script>', '<script src="./app-config.js"></script>\n  <script src="./api-shim.js"></script>\n  ', "before");
+html = insert(html, '<script src="./geo.js"></script>', '<script src="./app-config.js"></script>\n  <script src="./api-shim.js"></script>\n  <script src="./local-rules.js"></script>\n  <script src="./local-first.js"></script>\n  ', "before");
 html = insert(html, '<script src="./speech.js"></script>', '\n  <script src="./native-speech.js"></script>\n  <script src="./native-tts.js"></script>', "after");
 html = insert(html, '<script src="./app.js"></script>', '\n  <script src="./native-back.js"></script>', "after");
 writeFileSync(join(out, "index.html"), html);

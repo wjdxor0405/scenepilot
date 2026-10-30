@@ -16,6 +16,15 @@ What the app changes (all in `native/`, none in the web code):
 | `native-back.js` | Android's back button closes the menu or the screen on top (Ask a question, Conversation watch, My info); otherwise it puts the app in the background. It never moves the accident steps back and never ends the app. |
 | `build-www.mjs` | Copies every file `index.html` loads, makes paths relative, and wires the files above in. |
 
+### The first steps run on the phone (`local-first.js`, proof of concept)
+
+Starting an accident, consent, the two safety questions and the emergency notice are answered on the phone, without a connection and without a round trip per answer. Guidance, photos, questions and the summary still go to the server.
+
+- `local-first.js` wraps fetch. It answers those requests itself, in the shape the server uses, and records them. Whenever the server can be reached it replays the records with the normal API, so the server reaches the same state. The first request that only the server can answer hands the accident over; without a connection that request gets "This step needs an internet connection" and nothing is lost.
+- `local-rules.js` holds the texts, decisions and screens. It is generated from the server's Python rules: run `uv run python tools/export_local_rules.py` after changing `emergency.py` or `session.py`. Only the answer parsing (the same regular expressions) and the order of the steps are written in JavaScript.
+- `tests/test_local_first.py` checks that the phone gives the same screens as the server for the same answers, that replaying the records leaves the server in the same state, and that `local-rules.js` is up to date.
+- Not covered yet: the guidance steps run on the server, so a standard accident needs a connection after the safety questions. Speech recognition usually needs a connection too (use the buttons offline).
+
 `MainActivity.java` keeps the screen on while the app is in front, so hands-free listening and the conversation watch do not stop when the screen would time out.
 
 Everything else (location, microphone permission, camera through the file picker, spoken guidance, `tel:` links such as the 911 button, which open the phone's dialer) is handled by Android's web view.

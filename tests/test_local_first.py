@@ -70,7 +70,8 @@ def phone():
 
 
 def test_exported_rules_are_up_to_date():
-    current = (ROOT / "android-app" / "native" / "local-rules.js").read_text(encoding="utf-8")
+    # Line endings may change on checkout (core.autocrlf on Windows); the content may not.
+    current = (ROOT / "android-app" / "native" / "local-rules.js").read_text(encoding="utf-8").replace("\r\n", "\n")
     assert current == export_local_rules.render(export_local_rules.build()), "run: uv run python tools/export_local_rules.py"
 
 

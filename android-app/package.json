@@ -6,6 +6,7 @@
   "scripts": {
     "build:www": "node build-www.mjs",
     "sync": "node build-www.mjs && npx cap sync android",
+    "sync:release": "node build-www.mjs --release && npx cap sync android",
     "open": "npx cap open android",
     "run:phone": "node build-www.mjs && npx cap sync android && npx cap run android"
   },
@@ -13,6 +14,7 @@
     "@capacitor-community/speech-recognition": "^7.0.1",
     "@capacitor-community/text-to-speech": "^8.0.2",
     "@capacitor/android": "^8.5.3",
+    "@capacitor/app": "^8.1.2",
     "@capacitor/core": "^8.5.3"
   },
   "devDependencies": {

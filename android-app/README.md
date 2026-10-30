@@ -12,9 +12,13 @@ What the app changes (all in `native/`, none in the web code):
 |---|---|
 | `api-shim.js` | Adds the server's address in front of `/api/...` calls (set with `SCENEPILOT_API_BASE` when building). |
 | `native-speech.js` | Replaces the browser's speech recognition (Android web views do not have it) with Android's own recognizer. Command matching and `?fakespeech` are untouched. |
-| `build-www.mjs` | Copies the web files, makes paths relative, and wires the two files above in. |
+| `native-tts.js` | Replaces the web view's speech synthesis with Android's own text-to-speech, which reliably reports when it has finished. |
+| `native-back.js` | Android's back button closes the menu or the screen on top (Ask a question, Conversation watch, My info); otherwise it puts the app in the background. It never moves the accident steps back and never ends the app. |
+| `build-www.mjs` | Copies every file `index.html` loads, makes paths relative, and wires the files above in. |
 
-Everything else (location, microphone permission, camera through the file picker, spoken guidance) is handled by Android's web view.
+`MainActivity.java` keeps the screen on while the app is in front, so hands-free listening and the conversation watch do not stop when the screen would time out.
+
+Everything else (location, microphone permission, camera through the file picker, spoken guidance, `tel:` links such as the 911 button, which open the phone's dialer) is handled by Android's web view.
 
 ## Build and run (Galaxy S25 over USB)
 
@@ -34,8 +38,16 @@ npx cap open android                                           # opens Android S
 
 `npm run run:phone` does build, sync and run in one go once `ANDROID_HOME` points at the SDK.
 
+Without `SCENEPILOT_API_BASE` the app talks to `http://10.0.2.2:8000`, which only works in the emulator.
+
+For a release build, point it at the deployed server. It must be `https://`, or the build stops:
+
+```bash
+SCENEPILOT_API_BASE=https://<deployed server> npm run sync:release
+```
+
 ## Notes
 
-- **Cleartext HTTP is allowed** (`usesCleartextTraffic` in the manifest and `allowMixedContent`) so the app can reach a server on the local network. Remove both and use an `https://` server address before releasing.
+- **Cleartext HTTP is allowed in debug builds only** (`app/src/debug/AndroidManifest.xml`), so a debug build can reach a server on the local network. Release builds have no cleartext HTTP. `allowMixedContent` (set in `capacitor.config.js`) is on only when the last build named an `http://` server.
 - The app asks for microphone, location and camera at first use. Consent is remembered inside the app like in the browser.
 - **Checked:** the build script, the manifest permissions, the CORS switch and the speech adapter against a fake plugin, and installing and opening the app on a Galaxy S25. **Not yet checked on the phone:** Magpie audio playback in the web view, spoken free questions, speech recognition in noise, and whether the microphone and location permissions are asked only once.

@@ -5,6 +5,7 @@ import re
 import shutil
 import subprocess
 from pathlib import Path
+from xml.etree import ElementTree
 
 import pytest
 from fastapi import FastAPI
@@ -77,8 +78,12 @@ def test_android_manifest_declares_the_permissions_the_app_uses():
 
 
 def test_cleartext_http_is_allowed_in_debug_builds_only():
-    main = (APP / "android" / "app" / "src" / "main" / "AndroidManifest.xml").read_text(encoding="utf-8")
-    debug = (APP / "android" / "app" / "src" / "debug" / "AndroidManifest.xml").read_text(encoding="utf-8")
+    main_path = APP / "android" / "app" / "src" / "main" / "AndroidManifest.xml"
+    debug_path = APP / "android" / "app" / "src" / "debug" / "AndroidManifest.xml"
+    for path in (main_path, debug_path):
+        ElementTree.parse(path)   # Gradle stops on a manifest that is not valid XML (for example "--" inside a comment)
+    main = main_path.read_text(encoding="utf-8")
+    debug = debug_path.read_text(encoding="utf-8")
     assert "usesCleartextTraffic" not in main
     assert 'android:usesCleartextTraffic="true"' in debug
 
